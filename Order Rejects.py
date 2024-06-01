@@ -2,7 +2,7 @@
 """
 Created on Sat Jun  1 17:05:59 2024
 
-@author: S7razzy
+@author: S7rasshofer
 """
 
 import tkinter as tk
@@ -11,6 +11,7 @@ import os
 from docx import Document
 import shutil
 import win32com.client
+
 
 # Path to the Shipback Templates folder in Documents
 templates_folder = os.path.join(os.path.expanduser('~'), 'Documents', 'Shipback Templates')
@@ -158,7 +159,7 @@ def apply_theme(theme):
         "Tropical Paradise": {"bg": "#FFE4B5", "fg": "#006400", "entry_bg": "#FFE4B5", "entry_fg": "#006400"},
     }
 
-    theme_colors = themes.get(theme, themes["Light Mode"])
+    theme_colors = themes.get(theme, themes["Cyber Hacker"])
     
     window.config(bg=theme_colors["bg"])
     for widget in window.winfo_children():
@@ -171,7 +172,7 @@ def apply_theme(theme):
         elif isinstance(widget, tk.Button):
             widget.config(bg=theme_colors["bg"], fg=theme_colors["fg"], activebackground=theme_colors["bg"], activeforeground=theme_colors["fg"])
     
-    
+
 
 #------------------------------------------------------------------------------
 
@@ -179,6 +180,9 @@ def apply_theme(theme):
 
 window = tk.Tk()
 window.title("Order Rejects")
+window.iconbitmap("face.ico")
+apply_theme("Cyber Hacker")
+
 
 # Variable to track "stay on top" state
 stay_on_top_var = tk.BooleanVar()
@@ -204,7 +208,7 @@ theme_menu = tk.Menu(menu_bar, tearoff=0)
 menu_bar.add_cascade(label="Themes", menu=theme_menu)
 theme_menu.add_command(label="Light Mode", command=lambda: apply_theme("Light Mode"))
 theme_menu.add_command(label="Dark Mode", command=lambda: apply_theme("Dark Mode"))
-theme_menu.add_command(label="Cyber Hacker", command=lambda: apply_theme("Cyber Hacker"))
+theme_menu.add_command(label="Cyber", command=lambda: apply_theme("Cyber Hacker"))
 theme_menu.add_command(label="Cottage Core", command=lambda: apply_theme("Cottage Core"))
 theme_menu.add_command(label="Ocean Blue", command=lambda: apply_theme("Ocean Blue"))
 theme_menu.add_command(label="Forest Green", command=lambda: apply_theme("Forest Green"))
@@ -255,5 +259,7 @@ copies_entry.insert(0, "2")  # Default value for Copies
 generate_button = tk.Button(window, text="Generate Document", command=create_document)
 generate_button.grid(row=7, columnspan=2, pady=20)
 
+
+apply_theme("Cyber Hacker")
 # Run the GUI event loop
 window.mainloop()
