@@ -7,18 +7,17 @@ Running this project will create a folder for the Templates your Documents folde
 
 ## Documenting
 
-Creating the letter will create a folder on your desktop called 'Shipbacks'.  
-Creating the letter will simultaneously save the letter as the Customername & OrderNumber and Print out the amount of Copies.  
+Creating the letter will create a folder on your desktop called 'Shipbacks', this is where the files will save to.  
+This will simultaneously save the letter as the Customername & OrderNumber and Print out the amount of Copies (default 2).  
 Templates are created using Word, the variables can be placed within the document using double Curly Brackets.  
+Which template used is dependant on the drop box (default, Out of Policy).
 
 ![image](https://github.com/S7rasshofer/Order-Rejects/assets/104862406/291fce4c-6a41-48a7-8b19-00f482096b19)
 
-
-
 ## Menu
 
-### File
-
+Quick access to the local Saved Shipbacks & templates folder.  
+Toggle stay on top, ideal for clicking around multiple programs while conducting research on said order.
 
 ![image](https://github.com/S7rasshofer/Order-Rejects/assets/104862406/62e0c22a-312f-4894-be5d-a17319e9bdfa)
 
@@ -28,3 +27,10 @@ Templates are created using Word, the variables can be placed within the documen
 
 # Future Updates
 
+- Dynamic Templates, adding to the local folder will update the dropbox
+- Logg submissions instead of save letters
+  - Using Excel
+  - Using a Database
+    - Will need to have ability to query
+- Smoother better looking UI
+  - Smoother better looking Themes
