@@ -27,7 +27,7 @@ Toggle stay on top, ideal for clicking around multiple programs while conducting
 
 # Future Updates
 
-- Dynamic Templates, adding to the local folder will update the dropbox
+- Dynamic Templates, adding to the local folder will update the dropbox (Check)
 - Logg submissions instead of save letters
   - Using Excel
   - Using a Database
