@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Jun  1 17:05:59 2024
-
 @author: S7rasshofer
 """
 
@@ -13,31 +11,34 @@ import shutil
 import win32com.client
 
 
-# Path to the Shipback Templates folder in Documents
-templates_folder = os.path.join(os.path.expanduser('~'), 'Documents', 'Shipback Templates')
+# Path to the Return Reject Templates folder in Documents
+templates_folder = os.path.join(os.path.expanduser('~'), 'Documents', 'Return Reject Templates')
 
 # Path to the program's location
 program_location = os.path.dirname(os.path.abspath(__file__))
 
 # List of template files to check for
-template_files = ['Out of Policy.docx', 'Wrong Item.docx', 'Wrong Serial.docx']
+template_files = [f for f in os.listdir(templates_folder) if f.endswith('.docx')]
 
-# Create the Shipback Templates folder if it does not exist
+# Create the Return Reject Templates folder if it does not exist
 if not os.path.exists(templates_folder):
     os.makedirs(templates_folder)
 
-# Check if each template file exists in the Shipback Templates folder, and copy it from the program's location if not
+# Check if each template file exists in the Return Reject Templates folder, and copy it from the program's location if not
 for template_file in template_files:
     template_path = os.path.join(templates_folder, template_file)
     if not os.path.exists(template_path):
         source_template_path = os.path.join(program_location, 'shipback_templates', template_file)
         shutil.copyfile(source_template_path, template_path)
 
+def update_reason_menu():
+    reason_menu['menu'].delete(0, 'end')
+    for choice in reason_choices:
+        reason_menu['menu'].add_command(label=choice, command=tk._setit(reason_var, choice))
 
 #------------------------------------------------------------------------------
 
 
-# Function to create and save a Word document
 def create_document():
     customer_name = customer_name_entry.get()
     order_no = order_no_entry.get()
@@ -47,15 +48,8 @@ def create_document():
     tracking_number = tracking_number_entry.get()
     num_copies = int(copies_entry.get())  # Get the number of copies
 
-    # Define a dictionary mapping reason codes to template file names
-    templates = {
-        "Out of Policy": "Out of Policy.docx",
-        "Wrong Item": "Wrong Item.docx",
-        "Wrong Serial": "Wrong Serial.docx"
-    }
-
     # Path to the selected template document
-    template_path = os.path.join(os.path.expanduser('~'), 'Documents', 'shipback templates', templates.get(reason))
+    template_path = os.path.join(templates_folder, f"{reason}.docx")
 
     # Create the Shipbacks folder on the desktop if it does not exist
     shipbacks_folder = os.path.join(os.path.expanduser('~'), 'Desktop', 'Shipbacks')
@@ -97,7 +91,7 @@ def create_document():
     word.Quit()
 
     #print(f"{num_copies} copies printed.")
-    response = messagebox.askquestion("Next Shipback", "Do you want to create another shipback?")
+    response = messagebox.askquestion("Next Order", "Do you want to create another shipback? Please wait for printout.")
     if response == 'yes':
         # Clear all text boxes
         customer_name_entry.delete(0, tk.END)
@@ -105,11 +99,8 @@ def create_document():
         reason_var.set(reason_choices[0])  # Reset to default reason
         ordered_item_entry.delete(0, tk.END)
         returned_item_entry.delete(0, tk.END)
-        tracking_number_entry.delete(0, tk.END)
-        
+        tracking_number_entry.delete(0, tk.END)   
 
-
-# Function to toggle "stay on top" behavior
 def toggle_stay_on_top():
     current_state = window.attributes('-topmost')
     window.attributes('-topmost', not current_state)
@@ -120,17 +111,14 @@ def update_stay_on_top_label():
     new_label = "Toggle Stay on Top" + (" \u2713" if stay_on_top_var.get() else "")
     file_menu.entryconfig(toggle_stay_on_top_index, label=new_label)
 
-# Function to update the menu item label
 def update_menu():
     stay_on_top_menu_label = "Toggle Stay on Top" + (" \u2713" if stay_on_top_var.get() else "")
     file_menu.entryconfig(toggle_stay_on_top_index, label=stay_on_top_menu_label)
 
-# Function to open the Templates location in the Documents folder
 def open_templates_folder():
-    templates_folder = os.path.join(os.path.expanduser('~'), 'Documents', 'shipback templates')
+    templates_folder = os.path.join(os.path.expanduser('~'), 'Documents', 'Return Reject templates')
     os.startfile(templates_folder)
 
-# Function to open the Shipbacks folder on the desktop
 def open_saved_files():
     shipbacks_folder = os.path.join(os.path.expanduser('~'), 'Desktop', 'Shipbacks')
     os.startfile(shipbacks_folder)
@@ -182,7 +170,8 @@ window = tk.Tk()
 window.title("Order Rejects")
 window.iconbitmap("face.ico")
 apply_theme("Cyber Hacker")
-
+window.geometry("300x300")
+window.resizable(False, False)
 
 # Variable to track "stay on top" state
 stay_on_top_var = tk.BooleanVar()
@@ -221,45 +210,53 @@ theme_menu.add_command(label="Garden Party", command=lambda: apply_theme("Garden
 theme_menu.add_command(label="Art Deco", command=lambda: apply_theme("Art Deco"))
 theme_menu.add_command(label="Tropical Paradise", command=lambda: apply_theme("Tropical Paradise"))
 
+
+#______________________________________________________________________________
+
 # Create labels and entry fields for each parameter
-tk.Label(window, text="Customer Name:", anchor="e").grid(row=0, column=0, sticky=tk.E, padx=10, pady=5)
+tk.Label(window, text="Customer Name", anchor="e").grid(row=0, column=0, sticky=tk.E, padx=10, pady=5)
 customer_name_entry = tk.Entry(window)
 customer_name_entry.grid(row=0, column=1, padx=10, pady=5)
 
-tk.Label(window, text="Order No.:", anchor="e").grid(row=1, column=0, sticky=tk.E, padx=10, pady=5)
+tk.Label(window, text="Order No.", anchor="e").grid(row=1, column=0, sticky=tk.E, padx=10, pady=5)
 order_no_entry = tk.Entry(window)
 order_no_entry.grid(row=1, column=1, padx=10, pady=5)
 
 # Drop-down box for Reason
-reason_var = tk.StringVar(window)
-reason_choices = ["Out of Policy", "Wrong Item", "Incorrect Serial#"]  # Add your reasons here
-reason_var.set(reason_choices[0])  # Set the default reason
-reason_dropdown = tk.OptionMenu(window, reason_var, *reason_choices)
-reason_dropdown.config(width=15)  # Set a fixed width for the drop-down box
-reason_dropdown.grid(row=2, column=1, padx=10, pady=5)
+reason_label = tk.Label(window, text="Reason", anchor="e")
+reason_label.grid(row=2, column=0, sticky=tk.E, padx=10, pady=5)
 
-tk.Label(window, text="Ordered Item:", anchor="e").grid(row=3, column=0, sticky=tk.E, padx=10, pady=5)
+# Get the list of available reasons (template filenames without the .docx extension)
+reason_choices = [os.path.splitext(template)[0] for template in template_files]
+reason_var = tk.StringVar(window)
+reason_var.set(reason_choices[0] if reason_choices else "")
+
+reason_menu = tk.OptionMenu(window, reason_var, *reason_choices)
+reason_menu.grid(row=2, column=1)
+
+tk.Label(window, text="Ordered Item", anchor="e").grid(row=3, column=0, sticky=tk.E, padx=10, pady=5)
 ordered_item_entry = tk.Entry(window)
 ordered_item_entry.grid(row=3, column=1, padx=10, pady=5)
 
-tk.Label(window, text="Returned Item:", anchor="e").grid(row=4, column=0, sticky=tk.E, padx=10, pady=5)
+tk.Label(window, text="Returned Item", anchor="e").grid(row=4, column=0, sticky=tk.E, padx=10, pady=5)
 returned_item_entry = tk.Entry(window)
 returned_item_entry.grid(row=4, column=1, padx=10, pady=5)
 
-tk.Label(window, text="Tracking Number:", anchor="e").grid(row=5, column=0, sticky=tk.E, padx=10, pady=5)
+tk.Label(window, text="Tracking Number", anchor="e").grid(row=5, column=0, sticky=tk.E, padx=10, pady=5)
 tracking_number_entry = tk.Entry(window)
 tracking_number_entry.grid(row=5, column=1, padx=10, pady=5)
 
-tk.Label(window, text="Copies:", anchor="e").grid(row=6, column=0, sticky=tk.E, padx=10, pady=5)
+tk.Label(window, text="Copies", anchor="e").grid(row=6, column=0, sticky=tk.E, padx=10, pady=5)
 copies_entry = tk.Entry(window)
 copies_entry.grid(row=6, column=1, padx=10, pady=5)
 copies_entry.insert(0, "2")  # Default value for Copies
 
 # Create a button to generate the document
-generate_button = tk.Button(window, text="Generate Document", command=create_document)
+generate_button = tk.Button(window, text="Create Letter", command=create_document)
 generate_button.grid(row=7, columnspan=2, pady=20)
 
 
 apply_theme("Cyber Hacker")
-# Run the GUI event loop
+update_reason_menu()
+
 window.mainloop()
