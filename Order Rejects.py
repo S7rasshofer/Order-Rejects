@@ -18,6 +18,7 @@ templates_folder = os.path.join(os.path.expanduser('~'), 'Documents', 'Return Re
 program_location = os.path.dirname(os.path.abspath(__file__))
 
 # List of template files to check for
+default_templates = ['Out of Policy.docx', 'Wrong Item.docx', 'Wrong Serial.docx']
 template_files = [f for f in os.listdir(templates_folder) if f.endswith('.docx')]
 
 # Create the Return Reject Templates folder if it does not exist
@@ -25,16 +26,23 @@ if not os.path.exists(templates_folder):
     os.makedirs(templates_folder)
 
 # Check if each template file exists in the Return Reject Templates folder, and copy it from the program's location if not
-for template_file in template_files:
+for template_file in default_templates:
     template_path = os.path.join(templates_folder, template_file)
     if not os.path.exists(template_path):
-        source_template_path = os.path.join(program_location, 'shipback_templates', template_file)
-        shutil.copyfile(source_template_path, template_path)
+        source_template_path = os.path.join(program_location, 'reject_templates', template_file)
+        shutil.copyfile(source_template_path, template_file)
 
 def update_reason_menu():
+    # Update the reason_choices list based on the current contents of the templates folder
+    global reason_choices
+    template_files = [f for f in os.listdir(templates_folder) if f.endswith('.docx')]
+    reason_choices = [os.path.splitext(template)[0] for template in template_files]
+
+    # Clear and update the drop-down menu
     reason_menu['menu'].delete(0, 'end')
     for choice in reason_choices:
         reason_menu['menu'].add_command(label=choice, command=tk._setit(reason_var, choice))
+    reason_var.set(reason_choices[0] if reason_choices else "")
 
 #------------------------------------------------------------------------------
 
@@ -51,13 +59,13 @@ def create_document():
     # Path to the selected template document
     template_path = os.path.join(templates_folder, f"{reason}.docx")
 
-    # Create the Shipbacks folder on the desktop if it does not exist
-    shipbacks_folder = os.path.join(os.path.expanduser('~'), 'Desktop', 'Shipbacks')
-    if not os.path.exists(shipbacks_folder):
-        os.makedirs(shipbacks_folder)
+    # Create the Shirejects folder on the desktop if it does not exist
+    rejects_folder = os.path.join(os.path.expanduser('~'), 'Desktop', 'Rejects')
+    if not os.path.exists(rejects_folder):
+        os.makedirs(rejects_folder)
 
     # Copy the template to a new file
-    new_doc_path = os.path.join(shipbacks_folder, f"{customer_name}_{order_no}.docx")
+    new_doc_path = os.path.join(rejects_folder, f"{customer_name}_{order_no}.docx")
     shutil.copyfile(template_path, new_doc_path)
 
     # Open the copied template
@@ -91,7 +99,7 @@ def create_document():
     word.Quit()
 
     #print(f"{num_copies} copies printed.")
-    response = messagebox.askquestion("Next Order", "Do you want to create another shipback? Please wait for printout.")
+    response = messagebox.askquestion("Next Order", "Do you want to create another reject? Please wait for printout.")
     if response == 'yes':
         # Clear all text boxes
         customer_name_entry.delete(0, tk.END)
@@ -115,13 +123,19 @@ def update_menu():
     stay_on_top_menu_label = "Toggle Stay on Top" + (" \u2713" if stay_on_top_var.get() else "")
     file_menu.entryconfig(toggle_stay_on_top_index, label=stay_on_top_menu_label)
 
+    # Clear and update the drop-down menu
+    reason_menu['menu'].delete(0, 'end')
+    for choice in reason_choices:
+        reason_menu['menu'].add_command(label=choice, command=tk._setit(reason_var, choice))
+    reason_var.set(reason_choices[0] if reason_choices else "")
+
 def open_templates_folder():
     templates_folder = os.path.join(os.path.expanduser('~'), 'Documents', 'Return Reject templates')
     os.startfile(templates_folder)
 
 def open_saved_files():
-    shipbacks_folder = os.path.join(os.path.expanduser('~'), 'Desktop', 'Shipbacks')
-    os.startfile(shipbacks_folder)
+    rejects_folder = os.path.join(os.path.expanduser('~'), 'Desktop', 'Rejects')
+    os.startfile(rejects_folder)
 
 
 
@@ -131,35 +145,39 @@ def open_saved_files():
 
 def apply_theme(theme):
     themes = {
-        "Light Mode": {"bg": "white", "fg": "black", "entry_bg": "white", "entry_fg": "black"},
-        "Dark Mode": {"bg": "black", "fg": "white", "entry_bg": "gray", "entry_fg": "white"},
+        "Light Mode": {"bg": "#FFFFFF", "fg": "#000000", "entry_bg": "#F0F0F0", "entry_fg": "#000000"},
+        "Dark Mode": {"bg": "#1E1E1E", "fg": "#FFFFFF", "entry_bg": "#333333", "entry_fg": "#FFFFFF"},
         "Cyber Hacker": {"bg": "#0F0F0F", "fg": "#33FF33", "entry_bg": "#0F0F0F", "entry_fg": "#33FF33"},
         "Cottage Core": {"bg": "#F5F5DC", "fg": "#6B4226", "entry_bg": "#FDF5E6", "entry_fg": "#6B4226"},
-        "Ocean Blue": {"bg": "#87CEEB", "fg": "black", "entry_bg": "#87CEEB", "entry_fg": "black"},
-        "Forest Green": {"bg": "#228B22", "fg": "black", "entry_bg": "#228B22", "entry_fg": "black"},
-        "Sunset Orange": {"bg": "#FF7F50", "fg": "black", "entry_bg": "#FF7F50", "entry_fg": "black"},
-        "Space Black": {"bg": "#000000", "fg": "#FFFFFF", "entry_bg": "#000000", "entry_fg": "#FFFFFF"},
-        "Vintage": {"bg": "#7FFFD4", "fg": "#000000", "entry_bg": "#7FFFD4", "entry_fg": "#000000"},
-        "Futuristic": {"bg": "#1E90FF", "fg": "#FFFFFF", "entry_bg": "#1E90FF", "entry_fg": "#FFFFFF"},
-        "Minimalist": {"bg": "#E0E0E0", "fg": "#212121", "entry_bg": "#E0E0E0", "entry_fg": "#212121"},
-        "Garden Party": {"bg": "#90EE90", "fg": "#006400", "entry_bg": "#90EE90", "entry_fg": "#006400"},
-        "Art Deco": {"bg": "#B22222", "fg": "#F5FFFA", "entry_bg": "#B22222", "entry_fg": "#F5FFFA"},
-        "Tropical Paradise": {"bg": "#FFE4B5", "fg": "#006400", "entry_bg": "#FFE4B5", "entry_fg": "#006400"},
+        "Ocean Blue": {"bg": "#87CEEB", "fg": "#000000", "entry_bg": "#B0E0E6", "entry_fg": "#000000"},
+        "Forest Green": {"bg": "#228B22", "fg": "#FFFFFF", "entry_bg": "#32CD32", "entry_fg": "#FFFFFF"},
+        "Sunset Orange": {"bg": "#FF7F50", "fg": "#000000", "entry_bg": "#FFA07A", "entry_fg": "#000000"},
+        "Space Black": {"bg": "#000000", "fg": "#FFFFFF", "entry_bg": "#1C1C1C", "entry_fg": "#FFFFFF"},
+        "Vintage": {"bg": "#FFDAB9", "fg": "#000000", "entry_bg": "#FFE4C4", "entry_fg": "#000000"},
+        "Futuristic": {"bg": "#1E90FF", "fg": "#FFFFFF", "entry_bg": "#4682B4", "entry_fg": "#FFFFFF"},
+        "Minimalist": {"bg": "#E0E0E0", "fg": "#212121", "entry_bg": "#F5F5F5", "entry_fg": "#212121"},
+        "Art Deco": {"bg": "#B22222", "fg": "#F5FFFA", "entry_bg": "#DC143C", "entry_fg": "#F5FFFA"},
+        "Tropical Orange": {"bg": "#FF9900", "fg": "#232F3E", "entry_bg": "#F8F8F8", "entry_fg": "#232F3E"},
+        "Core Blue": {"bg": "#003B64", "fg": "#FFFFFF", "entry_bg": "#00234E", "entry_fg": "#FFFFFF"}
     }
 
-    theme_colors = themes.get(theme, themes["Cyber Hacker"])
-    
-    window.config(bg=theme_colors["bg"])
-    for widget in window.winfo_children():
-        if isinstance(widget, tk.Label):
-            widget.config(bg=theme_colors["bg"], fg=theme_colors["fg"])
-        elif isinstance(widget, tk.Entry):
-            widget.config(bg=theme_colors["entry_bg"], fg=theme_colors["entry_fg"])
-        elif isinstance(widget, tk.OptionMenu):
-            widget.config(bg=theme_colors["bg"], fg=theme_colors["fg"])
-        elif isinstance(widget, tk.Button):
-            widget.config(bg=theme_colors["bg"], fg=theme_colors["fg"], activebackground=theme_colors["bg"], activeforeground=theme_colors["fg"])
-    
+    # Get the selected theme's colors
+    theme_colors = themes.get(theme)
+
+    if theme_colors:
+        # Set window background color
+        window.config(bg=theme_colors["bg"])
+
+        # Set the styles for all widgets
+        for widget in window.winfo_children():
+            if isinstance(widget, tk.Label):
+                widget.config(bg=theme_colors["bg"], fg=theme_colors["fg"])
+            elif isinstance(widget, tk.Entry):
+                widget.config(bg=theme_colors["entry_bg"], fg=theme_colors["entry_fg"], insertbackground=theme_colors["fg"])
+            elif isinstance(widget, tk.Button):
+                widget.config(bg=theme_colors["entry_bg"], fg=theme_colors["fg"], activebackground=theme_colors["bg"], activeforeground=theme_colors["fg"])
+            elif isinstance(widget, tk.OptionMenu):
+                widget.config(bg=theme_colors["entry_bg"], fg=theme_colors["fg"], activebackground=theme_colors["bg"], activeforeground=theme_colors["fg"])    
 
 
 #------------------------------------------------------------------------------
@@ -169,8 +187,7 @@ def apply_theme(theme):
 window = tk.Tk()
 window.title("Order Rejects")
 window.iconbitmap("face.ico")
-apply_theme("Cyber Hacker")
-window.geometry("300x300")
+window.geometry("260x290")
 window.resizable(False, False)
 
 # Variable to track "stay on top" state
@@ -184,8 +201,10 @@ window.config(menu=menu_bar)
 # Menu options
 file_menu = tk.Menu(menu_bar, tearoff=0)
 menu_bar.add_cascade(label="File", menu=file_menu)
-file_menu.add_command(label="Open Templates Location", command=open_templates_folder)
-file_menu.add_command(label="Open Shipbacks Folder", command=open_saved_files)
+file_menu.add_command(label="Update Reason List", command=update_reason_menu)
+file_menu.add_command(label="Open Templates Folder", command=open_templates_folder)
+file_menu.add_command(label="Open Rejects Folder", command=open_saved_files)
+
 
 # Add toggle stay on top menu item with checkbutton
 stay_on_top_menu_label = "Toggle Stay on Top"
@@ -198,6 +217,8 @@ menu_bar.add_cascade(label="Themes", menu=theme_menu)
 theme_menu.add_command(label="Light Mode", command=lambda: apply_theme("Light Mode"))
 theme_menu.add_command(label="Dark Mode", command=lambda: apply_theme("Dark Mode"))
 theme_menu.add_command(label="Cyber", command=lambda: apply_theme("Cyber Hacker"))
+theme_menu.add_command(label="Tropical Orange", command=lambda: apply_theme("Tropical Orange"))
+theme_menu.add_command(label="Core Blue", command=lambda: apply_theme("Core Blue"))
 theme_menu.add_command(label="Cottage Core", command=lambda: apply_theme("Cottage Core"))
 theme_menu.add_command(label="Ocean Blue", command=lambda: apply_theme("Ocean Blue"))
 theme_menu.add_command(label="Forest Green", command=lambda: apply_theme("Forest Green"))
@@ -206,9 +227,7 @@ theme_menu.add_command(label="Space Black", command=lambda: apply_theme("Space B
 theme_menu.add_command(label="Vintage", command=lambda: apply_theme("Vintage"))
 theme_menu.add_command(label="Futuristic", command=lambda: apply_theme("Futuristic"))
 theme_menu.add_command(label="Minimalist", command=lambda: apply_theme("Minimalist"))
-theme_menu.add_command(label="Garden Party", command=lambda: apply_theme("Garden Party"))
 theme_menu.add_command(label="Art Deco", command=lambda: apply_theme("Art Deco"))
-theme_menu.add_command(label="Tropical Paradise", command=lambda: apply_theme("Tropical Paradise"))
 
 
 #______________________________________________________________________________
